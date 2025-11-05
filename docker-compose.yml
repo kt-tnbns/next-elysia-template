@@ -1,0 +1,33 @@
+services:
+  backend:
+    build:
+      context: ./core
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - FRONTEND_URL=http://localhost:3001
+      - PORT=3000
+    volumes:
+      - ./core/src:/app/src
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:3000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

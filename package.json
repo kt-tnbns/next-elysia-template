@@ -1,0 +1,21 @@
+{
+  "name": "next-elysia-template",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack TypeScript template with Next.js and Elysia",
+  "scripts": {
+    "start:core": "cd core && bun run dev",
+    "start:web": "cd web && pnpm dev",
+    "dev": "concurrently \"npm run start:core\" \"npm run start:web\"",
+    "install:all": "cd core && bun install && cd ../web && pnpm install",
+    "format": "cd core && bun run format && cd ../web && pnpm format",
+    "format:check": "cd core && bun run format:check && cd ../web && pnpm format:check",
+    "build:web": "cd web && pnpm build",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "docker:prod": "docker-compose up --build",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

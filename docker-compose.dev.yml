@@ -1,0 +1,43 @@
+services:
+  backend:
+    build:
+      context: ./core
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - FRONTEND_URL=http://localhost:3001
+      - PORT=3000
+    volumes:
+      - ./core/src:/app/src
+      - ./core/package.json:/app/package.json
+    command: bun run dev
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: deps
+    ports:
+      - "3001:3001"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    volumes:
+      - ./web/src:/app/src
+      - ./web/public:/app/public
+      - ./web/package.json:/app/package.json
+      - ./web/next.config.ts:/app/next.config.ts
+      - ./web/tsconfig.json:/app/tsconfig.json
+    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm dev"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
