@@ -1,0 +1,40 @@
+# genv Configuration File
+# This file defines environment variables for your monorepo applications
+
+# Shared variables that can be referenced across all apps using ${shared:VARIABLE_NAME}
+shared:
+  variables:
+    # Example shared variables
+    DATABASE_HOST: localhost
+    DATABASE_PORT: '5432'
+    API_URL: https://api.example.com
+    REDIS_HOST: localhost
+    REDIS_PORT: '6379'
+
+# Apps in the monorepo
+apps:
+  # Example app configuration
+  web:
+    # Optional: default output path for all environments (e.g., '/apps/frontend' or 'apps/frontend')
+    # path: apps/frontend
+
+    environments:
+      local:
+        # Variables for local environment
+        # Generates: .env.local
+        NEXT_PUBLIC_API_URL: http://localhost:3000
+        PORT: 3001
+
+  # Another example app
+  core:
+    # Optional app-level configuration
+    # path: apps/backend
+
+    environments:
+      local:
+        NODE_ENV: dev
+        PORT: 3000
+        FRONTEND_URL: http://localhost:3001
+        CORS_ALLOWED_ORIGINS: '*'
+        CORS_CREDENTIALS: false
+        DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/nextjs_elysia_db?schema=public'
