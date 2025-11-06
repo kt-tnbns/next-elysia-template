@@ -8,13 +8,37 @@ A full-stack TypeScript template with Next.js frontend and Elysia backend, confi
 next-elysia-template/
 ├── core/                          # Elysia backend (Bun)
 │   ├── src/
-│   │   ├── configs/
-│   │   │   └── app.config.ts     # App configuration (CORS, ports, etc.)
-│   │   ├── lib/
-│   │   │   └── db.ts             # Prisma client singleton
-│   │   ├── routes/
-│   │   │   ├── public.route.ts   # Public API routes
-│   │   │   └── swagger.route.ts  # Swagger/OpenAPI docs
+│   │   ├── configs/               # Configuration files
+│   │   │   ├── app.config.ts     # App config (CORS, ports, etc.)
+│   │   │   └── constants.ts      # App-wide constants
+│   │   ├── lib/                  # Shared libraries
+│   │   │   ├── db.ts             # Prisma client singleton
+│   │   │   ├── logger.ts         # Structured logging utility
+│   │   │   └── errors/           # Error handling
+│   │   │       ├── AppError.ts   # Base error class
+│   │   │       ├── HttpError.ts  # HTTP-specific errors
+│   │   │       └── index.ts
+│   │   ├── middleware/           # Middleware layer
+│   │   │   ├── errorHandler.ts  # Global error handler
+│   │   │   ├── logger.middleware.ts  # Request logging
+│   │   │   └── index.ts
+│   │   ├── types/                # TypeScript type definitions
+│   │   │   ├── api.types.ts      # API response types
+│   │   │   ├── error.types.ts    # Error types
+│   │   │   └── index.ts
+│   │   ├── validators/           # Zod validation schemas
+│   │   │   ├── common.validator.ts  # Common schemas
+│   │   │   └── index.ts
+│   │   ├── services/             # Business logic layer
+│   │   │   ├── health.service.ts # Health check logic
+│   │   │   └── index.ts
+│   │   ├── utils/                # Utility functions
+│   │   │   ├── response.ts       # Response helpers
+│   │   │   └── index.ts
+│   │   ├── routes/               # API routes
+│   │   │   ├── health.route.ts   # Health endpoints
+│   │   │   ├── swagger.route.ts  # Swagger/OpenAPI docs
+│   │   │   └── index.ts          # Route registry
 │   │   ├── generated/
 │   │   │   └── prisma/           # Generated Prisma Client
 │   │   └── index.ts              # Main server entry point
@@ -50,24 +74,115 @@ next-elysia-template/
 └── README.md
 ```
 
+## 🏛️ Clean Architecture (Backend)
+
+The backend follows clean architecture principles with clear separation of concerns:
+
+### Layer Organization
+
+```
+src/
+├── configs/        # Configuration & constants
+├── lib/            # Shared libraries (DB, logger, errors)
+├── middleware/     # Express-like middleware (error handling, logging)
+├── types/          # TypeScript type definitions
+├── validators/     # Zod validation schemas
+├── services/       # Business logic layer
+├── utils/          # Helper functions (response builders, etc.)
+├── routes/         # API route handlers (thin layer)
+└── index.ts        # Application bootstrap
+```
+
+### Key Principles
+
+- **Separation of Concerns**: Each layer has a single responsibility
+- **Business Logic in Services**: Routes are thin, services contain logic
+- **Type Safety**: TypeScript types for all API responses and errors
+- **Validation**: Zod schemas for request validation
+- **Error Handling**: Custom error classes with global error handler
+- **Structured Logging**: Consistent logging across the application
+- **Response Standardization**: Unified API response format
+
+### Layer Responsibilities
+
+**Routes** (`routes/`): HTTP handling only
+- Define endpoints and HTTP methods
+- Call service layer methods
+- Return responses
+- Minimal logic
+
+**Services** (`services/`): Business logic
+- Core application logic
+- Database operations
+- Data transformation
+- Complex computations
+
+**Middleware** (`middleware/`): Cross-cutting concerns
+- Error handling
+- Request logging
+- Authentication (when added)
+- Rate limiting (when added)
+
+**Validators** (`validators/`): Input validation
+- Zod schemas for type-safe validation
+- Reusable validation patterns
+- Request parameter validation
+
+**Utils** (`utils/`): Helper functions
+- Response builders
+- Data formatters
+- Common utilities
+
+**Types** (`types/`): Type definitions
+- API response interfaces
+- Shared type definitions
+- Type exports
+
+**Lib** (`lib/`): Shared libraries
+- Database client
+- Logger
+- Error classes
+- External integrations
+
+### Example Flow
+
+```
+Request → Middleware → Route → Service → Database
+                ↓         ↓        ↓
+            Logging   Validation  Logic
+                ↓         ↓        ↓
+         Error Handler ← Response ← Data
+```
+
 ## 🚀 Features
 
+### Frontend
 - **Next.js 16** with App Router and React 19
+- **Axios** configured for API communication with interceptors
+- **Type-safe** API client and services with TypeScript
+- **Tailwind CSS 4** for modern styling
+
+### Backend
 - **Elysia** backend with TypeScript and Bun runtime
+- **Clean Architecture** with layered separation of concerns
 - **PostgreSQL** database with Docker support
 - **Prisma ORM** for type-safe database access
 - **Prisma Studio** - visual database browser included
 - **Swagger/OpenAPI** documentation with @elysiajs/swagger
-- **Axios** configured for API communication with interceptors
+- **Error Handling** - custom error classes with global handler
+- **Structured Logging** - consistent logging with context
+- **Zod Validation** - type-safe request validation
+- **Response Helpers** - standardized API responses
 - **CORS** properly configured with flexible origin settings
+- **Modular route system** for organized API endpoints
+- **Database health checks** - monitor API and DB connectivity
+
+### Development
 - **Prettier** for consistent code formatting across both projects
 - **Docker** and Docker Compose support for both dev and production
-- **Type-safe** API client and services with TypeScript
 - **Environment variables** with .env.template files
-- **Modular route system** for organized API endpoints
 - **Unified scripts** - manage both projects from root directory
-- **Database health checks** - monitor API and DB connectivity
-- **Example endpoints** demonstrating frontend-backend communication
+- **Hot-reload** support for both frontend and backend
 
 ## 🛠️ Prerequisites
 
@@ -375,48 +490,114 @@ The `/api/health` endpoint now checks both API and database connectivity:
 
 ## 💻 Usage
 
-### Adding New API Endpoints
+### Adding New API Endpoints (Clean Architecture Way)
 
-1. **Add endpoint in backend** (`core/src/routes/public.route.ts`):
+Follow these steps to add a new feature following clean architecture:
+
+1. **Define types** (`core/src/types/post.types.ts`):
    ```typescript
-   export const publicRoutes = new Elysia()
-     .get('/posts', () => ({
-       success: true,
-       posts: [{ id: 1, title: "Hello World" }]
-     }), {
+   export interface Post {
+     id: number;
+     title: string;
+     content: string;
+     createdAt: Date;
+   }
+   ```
+
+2. **Create validator** (`core/src/validators/post.validator.ts`):
+   ```typescript
+   import { z } from 'zod';
+
+   export const createPostSchema = z.object({
+     title: z.string().min(1).max(200),
+     content: z.string().min(1),
+   });
+
+   export type CreatePostInput = z.infer<typeof createPostSchema>;
+   ```
+
+3. **Create service** (`core/src/services/post.service.ts`):
+   ```typescript
+   import { prisma } from '../lib/db';
+   import type { Post } from '../types/post.types';
+   import type { CreatePostInput } from '../validators/post.validator';
+
+   export class PostService {
+     static async getAllPosts(): Promise<Post[]> {
+       return await prisma.post.findMany();
+     }
+
+     static async createPost(input: CreatePostInput): Promise<Post> {
+       return await prisma.post.create({ data: input });
+     }
+   }
+   ```
+
+4. **Create route** (`core/src/routes/post.route.ts`):
+   ```typescript
+   import { Elysia } from 'elysia';
+   import { PostService } from '../services';
+   import { ResponseHelper } from '../utils';
+   import { createPostSchema } from '../validators/post.validator';
+
+   export const postRoutes = new Elysia({ prefix: '/posts' })
+     .get('/', async () => {
+       const posts = await PostService.getAllPosts();
+       return ResponseHelper.success(posts);
+     })
+     .post('/', async ({ body }) => {
+       const validated = createPostSchema.parse(body);
+       const post = await PostService.createPost(validated);
+       return ResponseHelper.success(post, 'Post created');
+     }, {
        detail: {
          tags: ['Posts'],
-         summary: 'Get all posts',
-         description: 'Returns a list of all posts',
+         summary: 'Create post',
        }
-     })
+     });
    ```
 
-2. **Mount route in** (`core/src/index.ts`):
+5. **Register route** (`core/src/routes/index.ts`):
    ```typescript
-   .group('/api', (app) => app.use(publicRoutes))
+   export { healthRoutes } from './health.route';
+   export { postRoutes } from './post.route';
    ```
 
-3. **Create service in frontend** (`web/src/lib/services.ts` or `web/src/app/services/`):
+6. **Mount in app** (`core/src/index.ts`):
+   ```typescript
+   import { healthRoutes, postRoutes } from './routes';
+
+   // ...
+   .group('/api', (app) =>
+     app
+       .use(healthRoutes)
+       .use(postRoutes)
+   )
+   ```
+
+7. **Create frontend service** (`web/src/lib/services.ts`):
    ```typescript
    import { api } from '@/lib/api';
 
    export interface Post {
      id: number;
      title: string;
+     content: string;
    }
 
    export const postService = {
-     getAll: () => api.get<{ success: boolean; posts: Post[] }>('/api/posts'),
+     getAll: () => api.get<{ success: boolean; data: Post[] }>('/api/posts'),
+     create: (data: { title: string; content: string }) =>
+       api.post<{ success: boolean; data: Post }>('/api/posts', data),
    };
    ```
 
-4. **Use in component**:
+8. **Use in component**:
    ```typescript
    import { postService } from '@/lib/services';
 
-   const data = await postService.getAll();
-   console.log(data.posts);
+   const { data } = await postService.getAll();
+   console.log(data); // Post[]
    ```
 
 ## 🎨 Code Formatting
@@ -520,11 +701,15 @@ docker-compose build frontend
 - **Runtime:** Bun (fast JavaScript runtime)
 - **Framework:** Elysia (high-performance web framework)
 - **Language:** TypeScript
+- **Architecture:** Clean Architecture with layered structure
 - **Database:** PostgreSQL 16 (reliable, feature-rich)
 - **ORM:** Prisma (type-safe database access)
+- **Validation:** Zod (type-safe schema validation)
 - **CORS:** @elysiajs/cors (configurable cross-origin support)
 - **Documentation:** @elysiajs/swagger (OpenAPI/Swagger UI)
 - **Config:** env-var (type-safe environment variables)
+- **Logging:** Custom structured logger
+- **Error Handling:** Custom error classes (AppError, HttpError)
 
 ### Frontend (web/)
 - **Framework:** Next.js 16 (App Router)

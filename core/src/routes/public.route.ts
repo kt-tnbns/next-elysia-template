@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia';
-import { checkDatabaseConnection } from '../lib/db';
+import { checkDatabaseConnection } from '../infrastructure/database';
 
 export const publicRoutes = new Elysia()
   .get(
