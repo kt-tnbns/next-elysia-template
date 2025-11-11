@@ -2,7 +2,7 @@ import { cors } from '@elysiajs/cors';
 import Elysia from 'elysia';
 
 import { appConfig } from './configs/app.config';
-import { APP_NAME, APP_VERSION } from './configs/constants';
+import { APP_NAME, APP_VERSION } from './shared/constants/base.constants';
 import { logger } from './lib/logger';
 import { errorHandler, requestLogger } from './middleware';
 import { healthRoutes } from './routes';

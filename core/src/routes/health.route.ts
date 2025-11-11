@@ -5,30 +5,34 @@ import { HealthService } from '../services';
  * Health and system info routes
  */
 
-export const healthRoutes = new Elysia({ prefix: '/health' })
-  .get(
-    '/',
-    async () => {
-      return await HealthService.checkHealth();
-    },
-    {
-      detail: {
-        tags: ['Health'],
-        summary: 'Health check',
-        description: 'Returns the health status of the API and database',
+export const createHealthRoutes = () => {
+  return new Elysia({ prefix: '/health' })
+    .get(
+      '/',
+      async () => {
+        return await HealthService.checkHealth();
       },
-    }
-  )
-  .get(
-    '/info',
-    () => {
-      return HealthService.getSystemInfo();
-    },
-    {
-      detail: {
-        tags: ['Health'],
-        summary: 'System information',
-        description: 'Returns information about the API system',
+      {
+        detail: {
+          tags: ['Health'],
+          summary: 'Health check',
+          description: 'Returns the health status of the API and database',
+        },
+      }
+    )
+    .get(
+      '/info',
+      () => {
+        return HealthService.getSystemInfo();
       },
-    }
-  );
+      {
+        detail: {
+          tags: ['Health'],
+          summary: 'System information',
+          description: 'Returns information about the API system',
+        },
+      }
+    );
+};
+
+export const healthRoutes = createHealthRoutes();

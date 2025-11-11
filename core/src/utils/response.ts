@@ -1,4 +1,4 @@
-import type { ApiSuccessResponse, ApiErrorResponse, PaginationMeta } from '../types';
+import type { ApiSuccessResponse, ApiErrorResponse, PaginationMeta } from '../shared/types';
 
 /**
  * Standardized response helpers
@@ -59,11 +59,7 @@ export class ResponseHelper {
   /**
    * Calculate pagination metadata
    */
-  static calculatePagination(
-    total: number,
-    page: number,
-    limit: number
-  ): PaginationMeta {
+  static calculatePagination(total: number, page: number, limit: number): PaginationMeta {
     const totalPages = Math.ceil(total / limit);
 
     return {

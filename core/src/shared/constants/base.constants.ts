@@ -53,12 +53,3 @@ export const PAGINATION = {
   DEFAULT_LIMIT: 10,
   MAX_LIMIT: 100,
 } as const;
-
-/**
- * API Routes
- */
-export const API_ROUTES = {
-  HEALTH: '/health',
-  INFO: '/info',
-  DOCS: '/docs',
-} as const;

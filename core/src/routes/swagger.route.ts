@@ -3,7 +3,7 @@ import { Elysia } from 'elysia';
 
 import { appConfig } from '../configs/app.config';
 
-const createSwaggerRoutes = (): any => {
+const createSwaggerRoutes = (): Elysia => {
   return new Elysia().use(
     swagger({
       path: '/docs',

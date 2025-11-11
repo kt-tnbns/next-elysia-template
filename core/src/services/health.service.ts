@@ -1,34 +1,12 @@
 import { checkDatabaseConnection } from '../infrastructure/database';
-import { APP_NAME, APP_VERSION } from '../configs/constants';
+import { APP_NAME, APP_VERSION } from '../shared/constants/base.constants';
+import { HealthCheckResult, SystemInfo } from '../shared/types/health.type';
+import { HealthStatus, ServiceStatus } from '../shared/enums';
 
 /**
  * Health service
  * Business logic for health checks and system status
  */
-
-export interface HealthCheckResult {
-  success: boolean;
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  message: string;
-  timestamp: string;
-  version: string;
-  services: {
-    api: 'healthy' | 'unhealthy';
-    database: 'healthy' | 'unhealthy';
-  };
-}
-
-export interface SystemInfo {
-  success: boolean;
-  data: {
-    name: string;
-    version: string;
-    description: string;
-    features: string[];
-    endpoints: Record<string, string>;
-  };
-}
-
 export class HealthService {
   /**
    * Perform comprehensive health check
@@ -38,7 +16,11 @@ export class HealthService {
     const apiHealthy = true; // API is healthy if this code is running
 
     const allHealthy = dbHealthy && apiHealthy;
-    const status = allHealthy ? 'healthy' : dbHealthy ? 'degraded' : 'unhealthy';
+    const status = allHealthy
+      ? HealthStatus.HEALTHY
+      : dbHealthy
+        ? HealthStatus.DEGRADED
+        : HealthStatus.UNHEALTHY;
 
     return {
       success: true,
@@ -46,13 +28,13 @@ export class HealthService {
       message: allHealthy
         ? 'All services are operational'
         : dbHealthy
-        ? 'API is running but database connection failed'
-        : 'System is unhealthy',
+          ? 'API is running but database connection failed'
+          : 'System is unhealthy',
       timestamp: new Date().toISOString(),
       version: APP_VERSION,
       services: {
-        api: apiHealthy ? 'healthy' : 'unhealthy',
-        database: dbHealthy ? 'healthy' : 'unhealthy',
+        api: apiHealthy ? ServiceStatus.HEALTHY : ServiceStatus.UNHEALTHY,
+        database: dbHealthy ? ServiceStatus.HEALTHY : ServiceStatus.UNHEALTHY,
       },
     };
   }

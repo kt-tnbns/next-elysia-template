@@ -1,0 +1,10 @@
+export enum HealthStatus {
+  HEALTHY = 'healthy',
+  DEGRADED = 'degraded',
+  UNHEALTHY = 'unhealthy',
+}
+
+export enum ServiceStatus {
+  HEALTHY = 'healthy',
+  UNHEALTHY = 'unhealthy',
+}
